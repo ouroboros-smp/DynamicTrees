@@ -3,7 +3,6 @@ package com.dtteam.dynamictrees.platform;
 import com.dtteam.dynamictrees.DynamicTrees;
 import com.dtteam.dynamictrees.entity.FallingTreeEntity;
 import com.dtteam.dynamictrees.model.entity.FallingTreeEntityModel;
-import com.dtteam.dynamictrees.model.FallingTreeEntityModelFabric;
 import com.dtteam.dynamictrees.platform.services.IClientHelper;
 import com.mojang.blaze3d.platform.NativeImage;
 import net.minecraft.client.renderer.texture.SpriteContents;
@@ -17,7 +16,7 @@ public class FabricClientHelper implements IClientHelper {
             SpriteContents contents = sprite.contents();
             NativeImage image = contents.originalImage;
             if (image != null) {
-                return image.getPixelRGBA(x, y);
+                return image.getPixel(x, y);
             }
             return 0;
         } catch (Exception e) {
@@ -28,7 +27,7 @@ public class FabricClientHelper implements IClientHelper {
 
     @Override
     public FallingTreeEntityModel newFallingTreeEntityModel(FallingTreeEntity entity) {
-        return new FallingTreeEntityModelFabric(entity);
+        return new FallingTreeEntityModel(entity);
     }
 
 }

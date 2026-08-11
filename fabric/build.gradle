@@ -5,11 +5,28 @@ plugins {
 //mod_version = "${mod_version}${fabricVersionAppend}"
 version = mod_version
 
+sourceSets.main.java {
+    // The upstream Fabric branch still contains the pre-26.1 baked-model implementation and optional integrations
+    // whose dependencies do not yet target 26.2. The replacement block-state models live in model/blockstate.
+    exclude 'com/dtteam/dynamictrees/model/baked/**'
+    exclude 'com/dtteam/dynamictrees/model/BakedModelBlockPottedSapling.java'
+    exclude 'com/dtteam/dynamictrees/model/BranchBlockUnbakedModel.java'
+    exclude 'com/dtteam/dynamictrees/model/FallingTreeEntityModelFabric.java'
+    exclude 'com/dtteam/dynamictrees/compat/continuity/**'
+    exclude 'com/dtteam/dynamictrees/compat/waila/**'
+    exclude 'com/dtteam/dynamictrees/compat/SereneSeasonsSeasonProvider.java'
+}
+
+// Dynamic Trees' generated tags, recipes, loot tables, and models are shared by both loaders.
+sourceSets.main.resources {
+    srcDir project(':common').file('src/generated/resources')
+}
+
 dependencies {
     minecraft "com.mojang:minecraft:${minecraft_version}"
     implementation "net.fabricmc:fabric-loader:${fabric_loader_version}"
     implementation "net.fabricmc.fabric-api:fabric-api:${fabric_version}"
-    implementation "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:26.1.5"
+    implementation "fuzs.forgeconfigapiport:forgeconfigapiport-fabric:${project.forge_config_api_port_version}"
 }
 
 loom {

@@ -21,7 +21,7 @@ import net.minecraft.world.level.block.BeehiveBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BeehiveBlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.entity.BlockEntityTypes;
 import net.minecraft.world.level.block.state.BlockState;
 import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
@@ -145,7 +145,7 @@ public class BeeNestGenFeature extends GenFeature {
             nestState = nestState.setValue(BeehiveBlock.FACING, faceDir);
         }
         world.setBlock(pos, nestState, 3);
-        world.getBlockEntity(pos, BlockEntityType.BEEHIVE).ifPresent((blockEntity) -> {
+        world.getBlockEntity(pos, BlockEntityTypes.BEEHIVE).ifPresent((blockEntity) -> {
             int j = 2 + random.nextInt(2);
 
             for(int k = 0; k < j; ++k) {

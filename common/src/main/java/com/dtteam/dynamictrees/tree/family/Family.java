@@ -715,33 +715,33 @@ public class Family extends RegistryEntry<Family> implements Resettable<Family> 
                 Collections.singletonList(DTBlockTags.STRIPPED_BRANCHES_THAT_BURN);
     }
 
-    public void addGeneratedBlockTags (Function<TagKey<Block>, TagAppender<Block, Block>> tagAppender){
+    public void addGeneratedBlockTags (Function<TagKey<Block>, TagAppender<Block>> tagAppender){
         getBranch().ifPresent(branch -> {
-            tierTag(getDefaultBranchHarvestTier(), tagAppender).ifPresent(tagBuilder -> tagBuilder.add(branch));
+            tierTag(getDefaultBranchHarvestTier(), tagAppender).ifPresent(tagBuilder -> tagBuilder.add(branch.builtInRegistryHolder().key()));
             defaultBranchTags().forEach(tag -> {
                 if (!isOnlyIfLoaded()) {
-                    tagAppender.apply(tag).add(branch);
+                    tagAppender.apply(tag).add(branch.builtInRegistryHolder().key());
                 } else {
-                    tagAppender.apply(tag).addOptional(branch);
+                    tagAppender.apply(tag).addOptional(branch.builtInRegistryHolder().key());
                 }
             });
         });
 
         // Create stripped branch tag and harvest tag if the family has a stripped branch.
         getStrippedBranch().ifPresent(strippedBranch -> {
-            tierTag(getDefaultStrippedBranchHarvestTier(), tagAppender).ifPresent(tagBuilder -> tagBuilder.add(strippedBranch));
+            tierTag(getDefaultStrippedBranchHarvestTier(), tagAppender).ifPresent(tagBuilder -> tagBuilder.add(strippedBranch.builtInRegistryHolder().key()));
             defaultStrippedBranchTags().forEach(tag ->
             {
                 if (!isOnlyIfLoaded()) {
-                    tagAppender.apply(tag).add(strippedBranch);
+                    tagAppender.apply(tag).add(strippedBranch.builtInRegistryHolder().key());
                 } else {
-                    tagAppender.apply(tag).addOptional(strippedBranch);
+                    tagAppender.apply(tag).addOptional(strippedBranch.builtInRegistryHolder().key());
                 }
             });
         });
     }
 
-    protected Optional<TagAppender<Block, Block>> tierTag(@Nullable ToolMaterial tier, Function<TagKey<Block>, TagAppender<Block, Block>> tagAppender) {
+    protected Optional<TagAppender<Block>> tierTag(@Nullable ToolMaterial tier, Function<TagKey<Block>, TagAppender<Block>> tagAppender) {
         if (tier == null)
             return Optional.empty();
 
@@ -750,12 +750,12 @@ public class Family extends RegistryEntry<Family> implements Resettable<Family> 
         return Optional.of(tagAppender.apply(tag));
     }
 
-    public void addGeneratedItemTags (Function<TagKey<Item>, TagAppender<Item, Item>> tagAppender){
+    public void addGeneratedItemTags (Function<TagKey<Item>, TagAppender<Item>> tagAppender){
         getBranchItem().ifPresent(item -> {
                     if (!isOnlyIfLoaded()) {
-                        defaultBranchItemTags().forEach(tag -> tagAppender.apply(tag).add(item));
+                        defaultBranchItemTags().forEach(tag -> tagAppender.apply(tag).add(item.builtInRegistryHolder().key()));
                     } else {
-                        defaultBranchItemTags().forEach(tag -> tagAppender.apply(tag).addOptional(item));
+                        defaultBranchItemTags().forEach(tag -> tagAppender.apply(tag).addOptional(item.builtInRegistryHolder().key()));
                     }
                 }
         );

@@ -35,6 +35,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.EntityTypes;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -573,7 +574,7 @@ public class LeavesProperties extends RegistryEntry<LeavesProperties> implements
                 .randomTicks()
                 .sound(SoundType.GRASS)
                 .noOcclusion()
-                .isValidSpawn((s, r, p, e) -> e == EntityType.OCELOT || e == EntityType.PARROT)
+                .isValidSpawn((s, r, p, e) -> e == EntityTypes.OCELOT || e == EntityTypes.PARROT)
                 .isSuffocating((s, r, p) -> false)
                 .isViewBlocking((s, r, p) -> false)
                 .isRedstoneConductor((s, r, p) -> false)
@@ -710,13 +711,13 @@ public class LeavesProperties extends RegistryEntry<LeavesProperties> implements
                 Pair.of("connectAnyRadius", this.connectAnyRadius));
     }
 
-    public void addGeneratedBlockTags (Function<TagKey<Block>, TagAppender<Block, Block>> tagAppender){
+    public void addGeneratedBlockTags (Function<TagKey<Block>, TagAppender<Block>> tagAppender){
         getDynamicLeavesBlock().ifPresent(leaves ->
                 defaultLeavesTags().forEach(tag -> {
                     if (isOnlyIfLoaded()) {
-                        tagAppender.apply(tag).addOptional(leaves);
+                        tagAppender.apply(tag).addOptional(leaves.builtInRegistryHolder().key());
                     } else {
-                        tagAppender.apply(tag).add(leaves);
+                        tagAppender.apply(tag).add(leaves.builtInRegistryHolder().key());
                     }
                 })
         );

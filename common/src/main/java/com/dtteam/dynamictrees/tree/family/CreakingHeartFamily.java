@@ -113,15 +113,15 @@ public class CreakingHeartFamily extends AltBranchFamily {
         }
     }
 
-    public void addGeneratedBlockTags (Function<TagKey<Block>, TagAppender<Block, Block>> tagAppender){
+    public void addGeneratedBlockTags (Function<TagKey<Block>, TagAppender<Block>> tagAppender){
         super.addGeneratedBlockTags(tagAppender);
         getHeartBranch().ifPresent(branch -> {
-            tierTag(getDefaultBranchHarvestTier(), tagAppender).ifPresent(tagBuilder -> tagBuilder.add(branch));
+            tierTag(getDefaultBranchHarvestTier(), tagAppender).ifPresent(tagBuilder -> tagBuilder.add(branch.builtInRegistryHolder().key()));
             defaultBranchTags().forEach(tag -> {
                 if (!isOnlyIfLoaded()) {
-                    tagAppender.apply(tag).add(branch);
+                    tagAppender.apply(tag).add(branch.builtInRegistryHolder().key());
                 } else {
-                    tagAppender.apply(tag).addOptional(branch);
+                    tagAppender.apply(tag).addOptional(branch.builtInRegistryHolder().key());
                 }
             });
         });
