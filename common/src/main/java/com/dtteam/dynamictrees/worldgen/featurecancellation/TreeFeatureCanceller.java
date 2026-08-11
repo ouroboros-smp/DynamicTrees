@@ -2,14 +2,10 @@ package com.dtteam.dynamictrees.worldgen.featurecancellation;
 
 import com.dtteam.dynamictrees.api.worldgen.BiomePropertySelectors;
 import com.dtteam.dynamictrees.api.worldgen.FeatureCanceller;
-import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
-import net.minecraft.world.level.levelgen.feature.WeightedPlacedFeature;
 import net.minecraft.world.level.levelgen.feature.configurations.FeatureConfiguration;
-import net.minecraft.world.level.levelgen.feature.configurations.RandomFeatureConfiguration;
-import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 
 public class TreeFeatureCanceller<T extends FeatureConfiguration> extends FeatureCanceller {
 
@@ -24,42 +20,20 @@ public class TreeFeatureCanceller<T extends FeatureConfiguration> extends Featur
     public boolean shouldCancel(ConfiguredFeature<?, ?> configuredFeature, BiomePropertySelectors.NormalFeatureCancellation featureCancellations) {
         final FeatureConfiguration featureConfig = configuredFeature.config();
 
-        /*  The following code removes vanilla trees from the biome's generator.
-            There may be some problems as MultipleRandomFeatures can store other features too,
-            so these are currently removed from world gen too. The list is immutable so they can't be removed individually,
-            but one (unclean) solution may be to add the non-tree features back to the generator. */
-
-        if (featureConfig instanceof RandomFeatureConfiguration) {
-            // Removes configuredFeature if it contains trees.
-            return this.doesContainTrees((RandomFeatureConfiguration) featureConfig, featureCancellations);
-        } else if (this.treeFeatureConfigClass.isInstance(featureConfig)) {
-            String nameSpace = "";
+        if (this.treeFeatureConfigClass.isInstance(featureConfig)) {
+            String namespace = "";
             final Identifier featureRegistryName = BuiltInRegistries.FEATURE.getKey(configuredFeature.feature());
             if (featureRegistryName != null) {
-                nameSpace = featureRegistryName.getNamespace();
+                namespace = featureRegistryName.getNamespace();
             }
-            // Removes any individual trees if the namespace matches
-            return !nameSpace.isEmpty() && featureCancellations.shouldCancelNamespace(nameSpace);
+            return !namespace.isEmpty() && featureCancellations.shouldCancelNamespace(namespace);
         }
 
-        return false;
-    }
-
-
-    private boolean doesContainTrees(RandomFeatureConfiguration featureConfig, BiomePropertySelectors.NormalFeatureCancellation featureCancellations) {
-        for (WeightedPlacedFeature feature : featureConfig.features()) {
-            final PlacedFeature currentConfiguredFeature = feature.feature().value();
-            ConfiguredFeature<?,?> cf = currentConfiguredFeature.getFeatures()
-                    .findFirst().map(Holder::value).orElse(null);
-            if (cf == null) return false;
-            final Identifier featureRegistryName = BuiltInRegistries.FEATURE.getKey(cf.feature());
-
-            if (this.treeFeatureConfigClass.isInstance(currentConfiguredFeature.placement()) && featureRegistryName != null &&
-                featureCancellations.shouldCancelNamespace(featureRegistryName.getNamespace())) {
-                return true;
-            }
-        }
-        return false;
+        // Selector features expose their nested configured features through this API. Recursing here covers both
+        // random_selector and simple_random_selector without depending on their concrete configuration classes.
+        return featureConfig.getSubFeatures()
+                .map(holder -> holder.value())
+                .anyMatch(subFeature -> this.shouldCancel(subFeature, featureCancellations));
     }
 
 }
