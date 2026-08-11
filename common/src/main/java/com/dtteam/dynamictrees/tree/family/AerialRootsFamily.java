@@ -214,16 +214,16 @@ public class AerialRootsFamily extends Family {
     }
 
     @Override
-    public void addGeneratedBlockTags (Function<TagKey<Block>, TagAppender<Block, Block>> tagAppender){
+    public void addGeneratedBlockTags (Function<TagKey<Block>, TagAppender<Block>> tagAppender){
         super.addGeneratedBlockTags(tagAppender);
         //Create roots tag and root harvest tag if the family is mangrove-like.
         getRoots().ifPresent(roots -> {
-            this.tierTag(getDefaultRootsHarvestTier(), tagAppender).ifPresent(tagBuilder -> tagBuilder.add(roots));
+            this.tierTag(getDefaultRootsHarvestTier(), tagAppender).ifPresent(tagBuilder -> tagBuilder.add(roots.builtInRegistryHolder().key()));
             defaultRootsTags().forEach(tag -> {
                 if (!isOnlyIfLoaded()) {
-                    tagAppender.apply(tag).add(roots);
+                    tagAppender.apply(tag).add(roots.builtInRegistryHolder().key());
                 } else {
-                    tagAppender.apply(tag).addOptional(roots);
+                    tagAppender.apply(tag).addOptional(roots.builtInRegistryHolder().key());
                 }
             });
         });

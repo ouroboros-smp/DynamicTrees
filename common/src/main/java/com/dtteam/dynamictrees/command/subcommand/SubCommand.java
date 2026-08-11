@@ -30,7 +30,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.server.permissions.PermissionCheck;
 import net.minecraft.world.level.block.state.BlockState;
 
-import javax.annotation.Nullable;
+import org.jspecify.annotations.Nullable;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.Consumer;

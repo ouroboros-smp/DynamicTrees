@@ -294,14 +294,14 @@ public class SoilProperties extends RegistryEntry<SoilProperties> implements Res
         this.onlyIfLoaded.add(onlyIfLoaded);
     }
 
-    public void addGeneratedBlockTags (Function<TagKey<Block>, TagAppender<Block, Block>> tagAppender){
+    public void addGeneratedBlockTags (Function<TagKey<Block>, TagAppender<Block>> tagAppender){
         // add rooty blocks to the rooty soil tag.
         getBlock().ifPresent(rootyBlock ->
                 defaultSoilBlockTags().forEach(tag -> {
                     if (!isOnlyIfLoaded()) {
-                        tagAppender.apply(tag).add(rootyBlock);
+                        tagAppender.apply(tag).add(rootyBlock.builtInRegistryHolder().key());
                     } else {
-                        tagAppender.apply(tag).addOptional(rootyBlock);
+                        tagAppender.apply(tag).addOptional(rootyBlock.builtInRegistryHolder().key());
                     }
                 }));
     }
