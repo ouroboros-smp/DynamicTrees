@@ -5,6 +5,64 @@ plugins {
 //mod_version = "${mod_version}${fabricVersionAppend}"
 version = mod_version
 
+def customBlockStateModelTypes = [
+        'dynamictrees:branch',
+        'dynamictrees:surface_root',
+        'dynamictrees:roots',
+        'dynamictrees:creaking_heart',
+        'dynamictrees:potted_dynamic_sapling',
+        'dynamictrees:aerial_roots_soil',
+        'dynamictrees:roots_moss'
+]
+
+tasks.register('verifyFabricCustomBlockStateModels') {
+    group = 'verification'
+    description = 'Checks that Fabric custom block-state models use the 26.2 fabric:type discriminator.'
+
+    dependsOn tasks.named('prepareFabricCustomBlockStateModels')
+    def blockStateFiles = fileTree(layout.buildDirectory.dir('generated/fabricResources')) {
+        include 'assets/**/blockstates/*.json'
+    }
+    inputs.files(blockStateFiles)
+
+    doLast {
+        def invalidFiles = blockStateFiles.findAll { file ->
+            def json = new groovy.json.JsonSlurper().parse(file)
+            def models = []
+            if (json.variants instanceof Map) {
+                models.addAll(json.variants.values().flatten())
+            }
+            if (json.multipart instanceof List) {
+                models.addAll(json.multipart.collectMany { part ->
+                    part.apply instanceof List ? part.apply : [part.apply]
+                })
+            }
+            models.any { model ->
+                model instanceof Map && customBlockStateModelTypes.contains(model.type) && model['fabric:type'] == null
+            }
+        }
+        if (!invalidFiles.empty) {
+            throw new GradleException("Fabric 26.2 custom block-state models must use fabric:type: ${invalidFiles*.path.join(', ')}")
+        }
+    }
+}
+
+tasks.register('prepareFabricCustomBlockStateModels', Copy) {
+    description = 'Copies generated block states while translating custom model discriminators for Fabric 26.2.'
+    from project(':common').file('src/generated/resources')
+    into layout.buildDirectory.dir('generated/fabricResources')
+    filteringCharset = 'UTF-8'
+    filter { line ->
+        customBlockStateModelTypes.inject(line) { value, type ->
+            value.replace('"type": "' + type + '"', '"fabric:type": "' + type + '"')
+        }
+    }
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('verifyFabricCustomBlockStateModels')
+}
+
 sourceSets.main.java {
     // The upstream Fabric branch still contains the pre-26.1 baked-model implementation and optional integrations
     // whose dependencies do not yet target 26.2. The replacement block-state models live in model/blockstate.
@@ -19,7 +77,11 @@ sourceSets.main.java {
 
 // Dynamic Trees' generated tags, recipes, loot tables, and models are shared by both loaders.
 sourceSets.main.resources {
-    srcDir project(':common').file('src/generated/resources')
+    srcDir tasks.named('prepareFabricCustomBlockStateModels')
+}
+
+tasks.named('processResources') {
+    dependsOn tasks.named('prepareFabricCustomBlockStateModels')
 }
 
 dependencies {
